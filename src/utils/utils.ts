@@ -105,11 +105,10 @@ export function getCanvas(width: number = 1, height: number = 1, isOnScreen?: bo
     }
 }
 
-export function initCode(code: string, device: GPUDevice, label?: string): pipelineData {
+export function initCode(code: string, device: GPUDevice, label: string): pipelineData {
     const { vertexEntryPoint, fragmentEntryPoint, bindingTypeInfos } = parseWGSL(code);
     const groupInfos = getGroupInfos(bindingTypeInfos);
 
-    // const bindGroupLayoutMap = new Map<number, GPUBindGroupLayout>();
     groupInfos.forEach(({ groupLayoutDescriptor }) => {
         const entries: GPUBindGroupLayoutEntry[] = [];
         for (let entry of groupLayoutDescriptor.entries) {
@@ -121,8 +120,6 @@ export function initCode(code: string, device: GPUDevice, label?: string): pipel
             };
             entries.push(entryFilled);
         }
-        // const bindGroupLayout = device.createBindGroupLayout({ entries });
-        // bindGroupLayoutMap.set(groupIndex, bindGroupLayout);
     });
 
     // todo analyzing from code
@@ -142,11 +139,8 @@ export function initCode(code: string, device: GPUDevice, label?: string): pipel
         ],
     };
 
-    // const bindGroupLayouts = bindGroupLayoutMap.values();
-    // const pipelineLayout = device.createPipelineLayout({ bindGroupLayouts });
-    const module = device.createShaderModule({ code });
+    const module = device.createShaderModule({ label,code });
     const descriptor: GPURenderPipelineDescriptor = {
-        // layout: pipelineLayout,
         layout: "auto",
         vertex: {
             module,
@@ -163,7 +157,7 @@ export function initCode(code: string, device: GPUDevice, label?: string): pipel
             frontFace: "ccw", // ccw（counter clock wise 逆时针） or cw （clock wise 顺时针）
             cullMode: "back", // none or front or back
         },
-        label: label, // Apply the label to the pipeline descriptor
+        label: label,
     };
     const pipeline = device.createRenderPipeline(descriptor);
 

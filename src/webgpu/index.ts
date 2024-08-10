@@ -4,7 +4,7 @@ import noiseCode from "../wgsl/noise.wgsl";
 import warpCode from "../wgsl/warp.wgsl";
 import copyCode from "../wgsl/copy.wgsl";
 import blurCode from "../wgsl/blur.wgsl";
-import type { BlurFilterParam, CommonArray, EffectType, FilterParam, GroupInfo, pipelineData } from "../utils/type";
+import type { BlurFilterParam, CommonArray, FilterType, FilterParam, GroupInfo, pipelineData } from "../utils/type";
 import { getTextureSize } from "../utils/texture";
 
 interface CommandData {
@@ -31,7 +31,7 @@ export class BasicRenderer {
     offTexture1: GPUTexture | undefined;
     resourceMap: Map<string, GPUBindingResource | GPUBindingResource[] | VertexData>;
     pipelineDataMap: Map<string, pipelineData> = new Map();
-    filterCodeMap: Map<EffectType, string> = new Map();
+    filterCodeMap: Map<FilterType, string> = new Map();
     activeIndex = -1;
     constructor(device: GPUDevice) {
         this.device = device;
@@ -203,7 +203,7 @@ export class BasicRenderer {
         }
     }
 
-    getPipelineData({ filterType, code }: { filterType: EffectType; code: string | undefined }) {
+    getPipelineData({ filterType, code }: { filterType: FilterType; code: string | undefined }) {
         let filterCode: string | undefined = code;
         if (!filterCode) {
             filterCode = this.filterCodeMap.get(filterType);

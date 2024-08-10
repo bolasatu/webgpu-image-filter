@@ -1,0 +1,16 @@
+render loop
+
+render() in samples/index.ts
+
+goal
+
+do it like cobalt with array of post
+it already does with 
+
+
+
+in samples/index.ts
+why 
+    const outCanvas = renderer.render(imgBitmap, dataArray, url);
+    ctx.drawImage(outCanvas, 0, 0);
+renderer has a canvas cache

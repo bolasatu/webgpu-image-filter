@@ -15,11 +15,13 @@ basicCanvas.width = w;
 basicCanvas.height = h;
 
 const PARAMS = {
-    blur: 10,
-    warp: 1,
+    blur: 0,
+    warp: 0,
+
     seed: 0,
     noise: 40,
     granularity: 10,
+    
     shadow: 10,
     center: { x: 0, y: 0 },
     backgroundColor: "#88ddff",
@@ -34,12 +36,16 @@ const baseInputs: InputBindingApi<any, any>[] = [];
 
 const f2 = pane.addFolder({ title: "Ablation" });
 const f3 = pane.addFolder({ title: "Blur" });
-const f4 = pane.addFolder({ title: "Twist" });
+const f4 = pane.addFolder({ title: "Warp" });
+
 baseInputs.push(f2.addInput(PARAMS, "noise", { label: "strength", min: 0, max: 100 }));
 baseInputs.push(f2.addInput(PARAMS, "granularity", { label: "scale", min: 0, max: 100 }));
 baseInputs.push(f2.addInput(PARAMS, "seed", { label: "seed", min: 0, max: 1 }));
+
+
 baseInputs.push(f3.addInput(PARAMS, "blur", { label: "strength", min: 0, max: 300 }));
-baseInputs.push(f4.addInput(PARAMS, "warp", { label: "strength", min: -100, max: 100 }));
+
+baseInputs.push(f4.addInput(PARAMS, "warp", { label: "strength", min: -2, max: 2 }));
 baseInputs.push(
     f4.addInput(PARAMS, "center", {
         label: "center",
