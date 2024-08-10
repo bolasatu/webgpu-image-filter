@@ -5,6 +5,7 @@ import "./index.css";
 import { getGpuDevice } from "../src/utils/utils";
 import { ImageUrls } from "./assets";
 import { NoiseFilterParam, WarpFilterParam, BlurFilterParam, FilterParam } from "../src/utils/type";
+const DEBUG = false; // Set this to false to disable debug logging
 
 const basicCanvas = <HTMLCanvasElement>document.getElementById("canvas")!;
 const w = 1200;
@@ -115,9 +116,9 @@ function render_(renderer_) {
 
     const dataArray: FilterParam[] = [noiseParam, warpParam, blurParam];
 
-    console.time("render");
+    if (DEBUG) console.time("render");
     const outCanvas = renderer_.render(imgBitmap, dataArray, url);
-    console.timeEnd("render");
+    if (DEBUG) console.timeEnd("render");
 
     // copyImage(imgBitmap);
     ctx.clearRect(0, 0, width, height);

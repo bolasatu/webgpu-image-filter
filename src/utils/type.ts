@@ -42,9 +42,10 @@ interface Property {
     key: string;
     value: BaseData;
 }
+export type EffectType = "noise" | "warp" | "copy" | "blur";
 
 export interface FilterParam {
-    filterType: string;
+    filterType: EffectType;
     enable?: boolean;
     code?: string
     properties: Property[];

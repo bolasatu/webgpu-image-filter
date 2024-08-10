@@ -105,7 +105,7 @@ export function getCanvas(width: number = 1, height: number = 1, isOnScreen?: bo
     }
 }
 
-export function initCode(code: string, device: GPUDevice, stage = GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT): pipelineData {
+export function initCode(code: string, device: GPUDevice, label?: string): pipelineData {
     const { vertexEntryPoint, fragmentEntryPoint, bindingTypeInfos } = parseWGSL(code);
     const groupInfos = getGroupInfos(bindingTypeInfos);
 
@@ -163,6 +163,7 @@ export function initCode(code: string, device: GPUDevice, stage = GPUShaderStage
             frontFace: "ccw", // ccw（counter clock wise 逆时针） or cw （clock wise 顺时针）
             cullMode: "back", // none or front or back
         },
+        label: label, // Apply the label to the pipeline descriptor
     };
     const pipeline = device.createRenderPipeline(descriptor);
 

@@ -4,7 +4,7 @@ import noiseCode from "../wgsl/noise.wgsl";
 import warpCode from "../wgsl/warp.wgsl";
 import copyCode from "../wgsl/copy.wgsl";
 import blurCode from "../wgsl/blur.wgsl";
-import type { BlurFilterParam, CommonArray, FilterParam, GroupInfo, pipelineData } from "../utils/type";
+import type { BlurFilterParam, CommonArray, EffectType, FilterParam, GroupInfo, pipelineData } from "../utils/type";
 import { getTextureSize } from "../utils/texture";
 
 interface CommandData {
@@ -19,7 +19,6 @@ interface VertexData {
     count: number;
     buffer: GPUBuffer;
 }
-
 export class BasicRenderer {
     cacheKey: string | undefined;
     canvas = getCanvas(1, 1);
@@ -32,7 +31,7 @@ export class BasicRenderer {
     offTexture1: GPUTexture | undefined;
     resourceMap: Map<string, GPUBindingResource | GPUBindingResource[] | VertexData>;
     pipelineDataMap: Map<string, pipelineData> = new Map();
-    filterCodeMap: Map<string, string> = new Map();
+    filterCodeMap: Map<EffectType, string> = new Map();
     activeIndex = -1;
     constructor(device: GPUDevice) {
         this.device = device;
@@ -41,10 +40,12 @@ export class BasicRenderer {
         const triangleMesh: TriangleMesh = new TriangleMesh(this.device);
         this.resourceMap.set("vertex", { buffer: triangleMesh.buffer, count: triangleMesh.count });
         this.resourceMap.set("mySampler", getSampler(device, {}));
+
         this.filterCodeMap.set("noise", noiseCode);
         this.filterCodeMap.set("warp", warpCode);
         this.filterCodeMap.set("copy", copyCode);
         this.filterCodeMap.set("blur", blurCode);
+
         this.updateBuffer("direction", [new Float32Array([1, 0]), new Float32Array([0, 1])]);
 
         const config: GPUCanvasConfiguration = {
@@ -202,7 +203,7 @@ export class BasicRenderer {
         }
     }
 
-    getPipelineData({ filterType, code }: { filterType: string; code: string | undefined }) {
+    getPipelineData({ filterType, code }: { filterType: EffectType; code: string | undefined }) {
         let filterCode: string | undefined = code;
         if (!filterCode) {
             filterCode = this.filterCodeMap.get(filterType);
@@ -210,11 +211,12 @@ export class BasicRenderer {
                 throw new Error(`filter ${filterType} code is not exist`);
             }
         } else {
-            this.filterCodeMap.set(filterType, filterCode);
+            this.filterCodeMap.set(filterType, filterCode);  // new filter kind
         }
+
         let pipelineData = this.pipelineDataMap.get(filterType);
         if (!pipelineData) {
-            pipelineData = initCode(filterCode!, this.device);
+            pipelineData = initCode(filterCode!, this.device, filterType);
             this.pipelineDataMap.set(filterType, pipelineData);
         }
         return pipelineData;
@@ -271,20 +273,20 @@ export class BasicRenderer {
         this.setCommandBuffer({ commandEncoder, pipelineData, targetTexture: target, inputTexture });
     }
 
-    render(sourceImage: GPUImageCopyExternalImage["source"], params: FilterParam[], cacheKey: string) {
+    render(sourceImage: GPUImageCopyExternalImage["source"], filterArr: FilterParam[], cacheKey: string) {
         this.load(sourceImage, cacheKey);
         const commandEncoder = this.device.createCommandEncoder();
 
-        for (let i = 0; i < params.length; i++) {
-            const filterParam = params[i];
-            if (filterParam.enable) {
-                const { filterType } = filterParam;
+        for (let i = 0; i < filterArr.length; i++) {
+            const filter = filterArr[i];
+            if (filter.enable) {
+                const { filterType } = filter;
                 switch (filterType) {
                     case "blur":
-                        this.blur(commandEncoder, filterParam as BlurFilterParam);
+                        this.blur(commandEncoder, filter as BlurFilterParam);
                         break;
                     default:
-                        this.filter(commandEncoder, filterParam);
+                        this.filter(commandEncoder, filter);
                 }
             }
         }
