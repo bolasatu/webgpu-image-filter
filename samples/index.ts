@@ -82,12 +82,8 @@ deepRender();
 let device;
 let renderer;
 
-async function render() {
-    if (!renderer) {
-        device = (await getGpuDevice()).device;
-        renderer = new BasicRenderer(device);
-    }
-
+function render_(renderer_) {
+    if (!imgBitmap) return;
     const { width, height } = imgBitmap;
     basicCanvas.width = width;
     basicCanvas.height = height;
@@ -120,13 +116,34 @@ async function render() {
     const dataArray: FilterParam[] = [noiseParam, warpParam, blurParam];
 
     console.time("render");
-    const outCanvas = renderer.render(imgBitmap, dataArray, url);
+    const outCanvas = renderer_.render(imgBitmap, dataArray, url);
     console.timeEnd("render");
 
     // copyImage(imgBitmap);
     ctx.clearRect(0, 0, width, height);
     ctx.drawImage(outCanvas, 0, 0);
+
 }
+async function render() {
+    if (!renderer) {
+        device = (await getGpuDevice()).device;
+        renderer = new BasicRenderer(device);
+    }
+    render_(renderer);
+
+}
+function renderLoop() {
+    if (!renderer) {
+        if (!device) {
+        debugger  // why the webgpu inspector clear device?
+        //     device = (await getGpuDevice()).device;
+        }
+        renderer = new BasicRenderer(device);
+    }
+  render_(renderer);
+  requestAnimationFrame(renderLoop);
+}
+
 
 async function deepRender() {
     url = ImageUrls[PARAMS.imageIndex];
@@ -151,3 +168,17 @@ imageInputs.forEach((input) => {
         deepRender();
     });
 });
+
+deepRender().then(t=>{
+  getGpuDevice().then(gpuDevice => {
+    device = gpuDevice.device;
+    renderer = new BasicRenderer(device);
+
+    // Start the loop
+    requestAnimationFrame(renderLoop);
+});
+    
+
+
+
+}); // first render to init the renderer
