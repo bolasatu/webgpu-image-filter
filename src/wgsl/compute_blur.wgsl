@@ -2,6 +2,7 @@ struct Params {
   filterDim : i32,
   blockDim : u32,
 }
+// THIS IS NOT USED, it uses blur.wgsl
 
 @group(0) @binding(0) var mySampler : sampler;
 @group(0) @binding(1) var<uniform> params : Params;

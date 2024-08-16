@@ -7,6 +7,7 @@ struct Unifroms {
 
 @group(0) @binding(0) var mySampler: sampler;
 @group(0) @binding(1) var myTexture: texture_2d<f32>;
+
 @group(1) @binding(0) var<uniform> warp_uniforms: Unifroms;
 
 @fragment

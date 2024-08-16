@@ -11,7 +11,9 @@ struct Direction {
 @group(0) @binding(0) var mySampler: sampler;
 @group(0) @binding(1) var myTexture: texture_2d<f32>;
 @group(1) @binding(0) var<uniform> blur_uniforms: Unifroms;
+
 @group(2) @binding(0) var<uniform> direction: Direction;
+
 @fragment
 fn frag_main(@location(0) fragUV: vec2<f32>) -> @location(0) vec4<f32> {
     // 卷积范围 k 为标准差系数 r = k * sigma, 区间（μ-3σ, μ+3σ）内的面积为99.73%, 所以卷积范围一般取 3

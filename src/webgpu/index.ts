@@ -50,7 +50,7 @@ export class BasicRenderer {
 
         const config: GPUCanvasConfiguration = {
             device,
-            alphaMode: "premultiplied",
+            alphaMode: "premultiplied", // premultipled simplify blending operation, 
             format,
         };
         this.ctx.configure(config);
@@ -142,6 +142,7 @@ export class BasicRenderer {
     setCommandBuffer({ commandEncoder, pipelineData, targetTexture, inputTexture, index }: CommandData) {
         const { groupInfos, pipeline } = pipelineData;
 
+        // this specify the target texture for the pipeline
         const passEncoder = getRenderPassEncoder(commandEncoder, targetTexture.createView());
         passEncoder.setPipeline(pipeline);
         this.resourceMap.set("myTexture", inputTexture.createView());
@@ -151,10 +152,11 @@ export class BasicRenderer {
         if (isRenderPipeline) {
             bindGroups.forEach(({ groupIndex, bindGroup }) => passEncoder.setBindGroup(groupIndex, bindGroup));
             const vertexData = this.resourceMap.get("vertex") as VertexData;
-            passEncoder.setVertexBuffer(0, vertexData.buffer);
-            passEncoder.draw(vertexData.count);
+            passEncoder.setVertexBuffer(0, vertexData.buffer); // shoulod not be necessary if hard code the triangle like four
+            passEncoder.draw(vertexData.count); // depend on mesh like four
             passEncoder.end();
-        } else {
+        } else { // for compute shader don't think it is used now
+            debugger
             const passEncoder: GPUComputePassEncoder = commandEncoder.beginComputePass();
             passEncoder.setPipeline(pipeline);
             bindGroups.forEach(({ groupIndex, bindGroup }) => passEncoder.setBindGroup(groupIndex, bindGroup));
@@ -229,6 +231,8 @@ export class BasicRenderer {
 
         const { value } = properties[0];
         // 注意在 value 后的占位数 0, value 和 center 数据大小一致
+        // blur layout is , value,   width and height not used?
+        // what happened to group 2 uniform, direction: Direction
         this.updateBuffer("blur_uniforms", new Float32Array([value, 0, this.width, this.height]));
 
         const pipelineData = this.getPipelineData({ filterType: "blur", code: blurCode });
@@ -262,7 +266,7 @@ export class BasicRenderer {
 
         if (filterType) {
             const pipelineData = this.getPipelineData({ filterType, code });
-            this.setCommandBuffer({ commandEncoder, pipelineData, ...this.getTexture() });
+            this.setCommandBuffer({ commandEncoder, pipelineData, ...this.getTexture() }); // this call draw
         }
     }
 
